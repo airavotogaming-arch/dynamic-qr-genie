@@ -5,3 +5,4 @@
 - [x] Verify creation, edit denial, redirect, exports and mobile layout.
 - [ ] Add local image color picking and optional three-color gradients.
 - [ ] Verify color sampling and shared preview/export gradient rendering.
+- [ ] Show a monochrome thank-you animation before opening scanned destinations.
