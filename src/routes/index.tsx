@@ -1,7 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowDownToLine, ArrowRight, ArrowUpRight, Check, ChevronDown, Copy, Eye, EyeOff, Grid2X2, Infinity as InfinityIcon, Link2, LockKeyhole, Palette, Plus, QrCode, Settings2, ShieldCheck, Sparkles, X, Loader2, Pencil, CircleHelp } from 'lucide-react';
+import { ArrowDownToLine, ArrowRight, ArrowUpRight, Check, ChevronDown, Copy, Eye, EyeOff, Grid2X2, Infinity as InfinityIcon, Link2, LockKeyhole, Palette, Plus, QrCode, Settings2, ShieldCheck, Sparkles, X, Loader2, Pencil, CircleHelp, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QRPreview } from '@/components/qr-preview';
 import { QRColorTools } from '@/components/qr-color-tools';
@@ -84,6 +84,7 @@ function QRStudio() {
         <Button variant="ghost" className="side-item active" onClick={() => { reset(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><Grid2X2 />QR generator <span className="nav-dot" /></Button>
         <Button variant="ghost" className="side-item" onClick={() => document.getElementById('recent-codes')?.scrollIntoView({ behavior: 'smooth' })}><QrCode />My QR codes<span className="nav-count">{recent.length}</span></Button>
         <Button variant="ghost" className="side-item" onClick={() => openManage()}><LockKeyhole />Manage a code<ArrowUpRight className="nav-arrow" /></Button>
+        <Button asChild variant="ghost" className="side-item"><Link to="/dashboard"><BarChart3 />Scan dashboard</Link></Button>
       </nav>
       <div className="sidebar-bottom"><div className="limit-label"><InfinityIcon /><span>Unlimited by design</span></div><p>Your next idea deserves a code.</p><div className="sidebar-rule" /><Button variant="ghost" className="side-item" onClick={() => setDialog('help')}><CircleHelp />Help & answers<ArrowUpRight className="nav-arrow" /></Button><div className="profile"><div className="profile-icon">Q</div><div><strong>Personal workspace</strong><span>Made for your next idea</span></div></div></div>
     </aside>

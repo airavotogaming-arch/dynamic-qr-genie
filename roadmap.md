@@ -6,3 +6,6 @@
 - [x] Add local image color picking and optional three-color gradients.
 - [x] Verify color sampling and shared preview/export gradient rendering.
 - [x] Show a monochrome thank-you animation before opening scanned destinations.
+- [ ] Record new QR visits without storing visitor identities.
+- [ ] Add password-protected per-code scan counts and paginated history.
+- [ ] Verify dashboard access, tracking, and existing QR behavior.

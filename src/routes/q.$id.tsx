@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useServerFn } from '@tanstack/react-start';
+import { useEffect, useRef } from 'react';
 import { ArrowUpRight, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { resolveQR } from '@/lib/qr.functions';
+import { resolveQR, recordScan } from '@/lib/qr.functions';
 export const Route = createFileRoute('/q/$id')({
   head: () => ({ meta: [{ title: 'QR link — Qraft' }, { name: 'description', content: 'Follow a dynamic Qraft QR link.' }, { property: 'og:title', content: 'QR link — Qraft' }, { property: 'og:description', content: 'Follow a dynamic Qraft QR link.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }, { name: 'robots', content: 'noindex' }] }),
   headers: () => ({ 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' }),
@@ -16,6 +17,14 @@ export const Route = createFileRoute('/q/$id')({
 
 function ScanThanks() {
   const destination = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const track = useServerFn(recordScan);
+  const event = useRef<{ id: string; event: string } | null>(null);
+  useEffect(() => {
+    if (!destination) return;
+    if (event.current?.id !== id) event.current = { id, event: crypto.randomUUID() };
+    void track({ data: event.current }).catch(() => { /* Analytics must never interrupt a scan. */ });
+  }, [id, destination, track]);
   useEffect(() => {
     if (!destination) return;
     const timer = window.setTimeout(() => window.location.replace(destination), 2200);

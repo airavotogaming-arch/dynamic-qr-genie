@@ -47,11 +47,41 @@ export type Database = {
         }
         Relationships: []
       }
+      qr_scans: {
+        Row: {
+          id: string
+          qr_id: string
+          scanned_at: string
+        }
+        Insert: {
+          id: string
+          qr_id: string
+          scanned_at?: string
+        }
+        Update: {
+          id?: string
+          qr_id?: string
+          scanned_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qr_scans_qr_id_fkey"
+            columns: ["qr_id"]
+            isOneToOne: false
+            referencedRelation: "qr_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      qr_analytics: {
+        Args: { p_id: string; p_page?: number; p_password: string }
+        Returns: Json
+      }
       qr_create: {
         Args: { p_label: string; p_password: string; p_url: string }
         Returns: Json
@@ -59,6 +89,10 @@ export type Database = {
       qr_manage: {
         Args: { p_id: string; p_password: string; p_url?: string }
         Returns: Json
+      }
+      qr_record_scan: {
+        Args: { p_event: string; p_id: string }
+        Returns: boolean
       }
       qr_resolve: { Args: { p_id: string }; Returns: string }
     }
