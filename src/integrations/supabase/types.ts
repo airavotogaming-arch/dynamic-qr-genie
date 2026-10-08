@@ -14,13 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      qr_links: {
+        Row: {
+          created_at: string
+          destination: string
+          failed_attempts: number
+          id: string
+          label: string
+          locked_until: string | null
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          destination: string
+          failed_attempts?: number
+          id?: string
+          label?: string
+          locked_until?: string | null
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          destination?: string
+          failed_attempts?: number
+          id?: string
+          label?: string
+          locked_until?: string | null
+          password_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      qr_create: {
+        Args: { p_label: string; p_password: string; p_url: string }
+        Returns: Json
+      }
+      qr_manage: {
+        Args: { p_id: string; p_password: string; p_url?: string }
+        Returns: Json
+      }
+      qr_resolve: { Args: { p_id: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
