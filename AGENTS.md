@@ -15,3 +15,5 @@
 - Store only code references in browser history, never passwords; Cloud is the source of truth for destinations.
 - Sample uploaded images locally in a browser canvas without storing or uploading them; image color picking does not need Cloud access.
 - Resolve scan destinations freshly in the public scan route, then redirect after a brief client-side interstitial; never cache destinations and provide a direct continuation link.
+- Record QR visits only after the scan page renders, using an idempotent event ID; loaders remain read-only so prefetching cannot inflate counts.
+- Keep scan events identity-free and accessible only through per-code password-verified analytics RPCs; dashboard passwords stay in transient React state, not browser storage.
