@@ -5,3 +5,11 @@ export const createSchema = z.object({ destination: urlSchema, label: z.string()
 export const manageSchema = z.object({ id: z.string().uuid('Enter a valid code ID.'), password: passwordSchema, destination: urlSchema.optional() });
 export const resultSchema = z.object({ id: z.string().uuid(), destination: urlSchema, label: z.string() });
 export type QRRecord = z.infer<typeof resultSchema>;
+export const analyticsSchema = manageSchema.omit({ destination: true }).extend({ page: z.number().int().min(0).max(100000).default(0) });
+export const scanSchema = z.object({ id: z.string().uuid(), event: z.string().uuid() });
+export const analyticsResultSchema = z.object({
+  code: resultSchema, total: z.number(), today: z.number(), week: z.number(),
+  lastScan: z.string().nullable(), page: z.number(),
+  scans: z.array(z.object({ id: z.string().uuid(), scannedAt: z.string() })),
+});
+export type QRAnalytics = z.infer<typeof analyticsResultSchema>;
