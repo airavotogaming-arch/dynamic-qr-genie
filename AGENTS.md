@@ -8,3 +8,8 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep QR destination records private and expose only narrowly scoped password-verified database functions; editing uses per-code credentials, not app user accounts.
+- Use a fixed public deployment origin in generated QR URLs so printed codes do not depend on the visitor's current preview host.
+- Render QR matrices with the qrcode library in browser canvases; styling and PNG exports must share one renderer for consistent output.
+- Store only code references in browser history, never passwords; Cloud is the source of truth for destinations.

@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791465303542,
+      "tag": "0000_dynamic_qr_passwords",
+      "breakpoints": true
+    }
+  ]
+}
