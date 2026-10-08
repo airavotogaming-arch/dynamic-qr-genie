@@ -3,3 +3,6 @@
 - [x] Save dynamic links and protect editing with per-code passwords.
 - [x] Add PNG export and existing-code management.
 - [x] Verify creation, edit denial, redirect, exports and mobile layout.
+- [x] Add local image color picking and optional three-color gradients.
+- [x] Verify color sampling and shared preview/export gradient rendering.
+- [x] Show a monochrome thank-you animation before opening scanned destinations.

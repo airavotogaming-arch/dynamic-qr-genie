@@ -1,5 +1,5 @@
 import QRCode from 'qrcode';
-export type QRStyle = { mode: 'solid' | 'gradient'; start: string; end: string; pattern: 'square' | 'rounded' | 'dots'; size: number };
+export type QRStyle = { mode: 'solid' | 'gradient'; start: string; middle?: string | undefined; end: string; pattern: 'square' | 'rounded' | 'dots'; size: number };
 export async function renderQR(canvas: HTMLCanvasElement, value: string, style: QRStyle) {
   const qr = QRCode.create(value, { errorCorrectionLevel: 'H' });
   const count = qr.modules.size;
@@ -8,7 +8,9 @@ export async function renderQR(canvas: HTMLCanvasElement, value: string, style: 
   ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, style.size, style.size);
   const unit = style.size / (count + 8);
   const gradient = ctx.createLinearGradient(0, 0, style.size, style.size);
-  gradient.addColorStop(0, style.start); gradient.addColorStop(1, style.end);
+  gradient.addColorStop(0, style.start);
+  if (style.middle) gradient.addColorStop(.5, style.middle);
+  gradient.addColorStop(1, style.end);
   ctx.fillStyle = style.mode === 'gradient' ? gradient : style.start;
   for (let row = 0; row < count; row++) for (let col = 0; col < count; col++) {
     if (!qr.modules.get(row, col)) continue;
