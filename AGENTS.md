@@ -13,3 +13,4 @@
 - Use a fixed public deployment origin in generated QR URLs so printed codes do not depend on the visitor's current preview host.
 - Render QR matrices with the qrcode library in browser canvases; styling and PNG exports must share one renderer for consistent output.
 - Store only code references in browser history, never passwords; Cloud is the source of truth for destinations.
+- Sample uploaded images locally in a browser canvas without storing or uploading them; image color picking does not need Cloud access.
