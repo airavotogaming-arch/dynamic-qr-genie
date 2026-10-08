@@ -78,9 +78,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Qraft — QR Code Studio" },
+      { title: "Airavoto Qraf — QR Code Studio" },
       { name: "description", content: "Beautiful, secure dynamic QR codes." },
-      { property: "og:title", content: "Qraft — QR Code Studio" },
+      { property: "og:title", content: "Airavoto Qraf — QR Code Studio" },
       { property: "og:description", content: "Beautiful, secure dynamic QR codes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

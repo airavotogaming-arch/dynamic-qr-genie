@@ -8,9 +8,9 @@ import { analyticsSchema, type QRAnalytics } from '@/lib/qr-schema';
 
 export const Route = createFileRoute('/dashboard')({
   head: () => ({ meta: [
-    { title: 'Scan dashboard — Qraft' },
-    { name: 'description', content: 'Privately view scan counts and timestamped scan history for your dynamic Qraft QR codes.' },
-    { property: 'og:title', content: 'Scan dashboard — Qraft' },
+    { title: 'Scan dashboard — Airavoto Qraf' },
+    { name: 'description', content: 'Privately view scan counts and timestamped scan history for your dynamic Airavoto Qraf QR codes.' },
+    { property: 'og:title', content: 'Scan dashboard — Airavoto Qraf' },
     { property: 'og:description', content: 'Password-protected scan activity for your dynamic QR codes.' },
     { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' },
     { name: 'robots', content: 'noindex' },
@@ -59,7 +59,7 @@ function ScanDashboard() {
 
   return <div className="workspace">
     <aside className="sidebar">
-      <Link to="/" className="brand"><QrCode strokeWidth={2.6} /><span>qraft<span className="brand-dot">.</span></span></Link>
+      <Link to="/" className="brand"><QrCode strokeWidth={2.6} /><span>Airavoto Qraf</span></Link>
       <div className="workspace-label">YOUR WORKSPACE</div>
       <nav className="side-nav" aria-label="Workspace">
         <Button asChild variant="ghost" className="side-item"><Link to="/"><Grid2X2 />QR generator</Link></Button>
@@ -70,7 +70,7 @@ function ScanDashboard() {
     <div className="main-shell">
       <header className="topbar"><div className="breadcrumb">Workspace<span>/</span><strong>Scan dashboard</strong></div><Button asChild variant="outline" size="sm"><Link to="/"><ArrowLeft />Generator</Link></Button></header>
       <main className="main-content analytics-content">
-        <div className="page-heading"><div><div className="eyebrow"><span />QRAFT ANALYTICS</div><h1>Scan dashboard</h1></div><span className="private-label"><ShieldCheck />Password protected</span></div>
+        <div className="page-heading"><div><div className="eyebrow"><span />AIRAVOTO QRAF ANALYTICS</div><h1>Scan dashboard</h1></div><span className="private-label"><ShieldCheck />Password protected</span></div>
         <section className="analytics-selector" aria-label="Choose a QR code">
           <div><label htmlFor="analytics-code-select">My QR codes</label><select id="analytics-code-select" value={codes.some(code => code.id === id) ? id : ''} onChange={e => lock(e.target.value)}><option value="">Choose a code or enter its ID</option>{codes.map(code => <option key={code.id} value={code.id}>{code.label || 'Untitled QR code'} · {code.id.slice(0, 8)}</option>)}</select></div>
           {data && <Button variant="outline" onClick={() => lock()}><LockKeyhole />Lock analytics</Button>}
