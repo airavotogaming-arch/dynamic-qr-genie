@@ -1,24 +1,45 @@
 # Dynamic QR Genie
 
-create a dynamic qr code geante url to ydnamic qr code unlinted geantor wit png iwtj gradient color style tec mai nit seacure onece qr ciode is genate i can chbnage the link only i can so add smin passoe lilke taht too ui will be balck white theem permuim look
+Dynamic QR codes with password-protected destination updates, anonymous scan counts, and per-code scan history.
 
-This project was built with [Lovable](https://lovable.dev).
+## Privacy and access
 
-## Build with Lovable
+- Anyone can scan a QR code and continue to its destination; **scanners do not need a password**.
+- The code owner must enter the per-code password to view/change its destination or unlock its scan dashboard.
+- Scan records contain only the QR code reference, a unique event ID, and a timestamp. IP addresses and user agents are not stored.
+- A short interstitial records a scan only after the QR page renders, then redirects to the current destination.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/d0347e18-0cc5-4492-8de7-fb731648bf27).
+## Neon and Render
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+The app connects to Neon from server-side code only. The `DATABASE_URL` secret must be configured in Render; do not expose it as a `VITE_` variable or commit it to source control. The schema is in `drizzle/migrations/0002_neon_qr_schema.sql`.
+
+Recommended Render configuration:
+
+- **Build command:** `bun install && NITRO_PRESET=node-server bun run build`
+- **Start command:** `node .output/server/index.mjs`
+- **Environment:** `DATABASE_URL` (Neon connection string)
+
+Generated QR links use the fixed public Render origin `https://dynamic-qr-genie.onrender.com` so preview hosts do not change printed codes.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+```sh
+bun install
+bun run dev
+```
+
+For a production-style local build and server:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+NITRO_PRESET=node-server bun run build
+node .output/server/index.mjs
+```
+
+Set `DATABASE_URL` in the server environment before creating codes or using scan analytics.
+
+## Tests
+
+```sh
+bun test
+bunx tsc --noEmit
 ```

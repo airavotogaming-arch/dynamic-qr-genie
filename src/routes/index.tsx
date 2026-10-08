@@ -35,7 +35,7 @@ function QRStudio() {
   const [dialogError, setDialogError] = useState('');
   useEffect(() => {
     // A fixed public origin keeps printed QR codes stable when previewing on another device.
-    setOrigin(window.location.hostname === 'localhost' ? window.location.origin : 'https://project--d0347e18-0cc5-4492-8de7-fb731648bf27.lovable.app');
+    setOrigin(window.location.hostname === 'localhost' ? window.location.origin : 'https://dynamic-qr-genie.onrender.com');
     try { const saved = JSON.parse(localStorage.getItem('qraft-recent') || '[]'); if (Array.isArray(saved)) setRecent(saved.filter(r => r && typeof r.id === 'string' && typeof r.label === 'string' && typeof r.destination === 'string')); } catch { /* empty history */ }
   }, []);
   useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(''), 4000); return () => clearTimeout(timer); }, [notice]);
