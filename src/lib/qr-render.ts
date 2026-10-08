@@ -1,5 +1,5 @@
 import QRCode from 'qrcode';
-export type QRStyle = { mode: 'solid' | 'gradient'; start: string; middle?: string; end: string; pattern: 'square' | 'rounded' | 'dots'; size: number };
+export type QRStyle = { mode: 'solid' | 'gradient'; start: string; middle?: string | undefined; end: string; pattern: 'square' | 'rounded' | 'dots'; size: number };
 export async function renderQR(canvas: HTMLCanvasElement, value: string, style: QRStyle) {
   const qr = QRCode.create(value, { errorCorrectionLevel: 'H' });
   const count = qr.modules.size;
