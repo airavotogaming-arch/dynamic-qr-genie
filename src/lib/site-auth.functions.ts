@@ -43,9 +43,9 @@ function recordFailure(key: string, now = Date.now()): boolean {
 export const loginAdmin = createServerFn({ method: "POST" })
   .validator(
     z.object({
-      username: z.string().min(1).max(128),
-      password: z.string().min(1).max(128),
-      otp: z.string().regex(/^\d{6}$/),
+      username: z.string().min(1).max(1024),
+      password: z.string().min(1).max(1024),
+      otp: z.string().min(1).max(1024),
     }),
   )
   .handler(async ({ data }) => {
@@ -59,14 +59,6 @@ export const loginAdmin = createServerFn({ method: "POST" })
           "Admin login is not configured. Set SITE_ADMIN_USERNAME, SITE_ADMIN_PASSWORD, and SITE_ADMIN_OTP in Render.",
       };
     }
-    if (password.length < 12 || !/^\d{6}$/.test(otp)) {
-      return {
-        ok: false as const,
-        error:
-          "Check the Render admin settings: the password must be at least 12 characters and the OTP must be six digits.",
-      };
-    }
-
     const key = clientKey();
     if (remainingLockout(key) > 0) {
       return { ok: false as const, error: "Too many attempts. Try again in 15 minutes." };

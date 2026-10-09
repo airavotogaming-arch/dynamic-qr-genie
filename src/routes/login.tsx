@@ -86,7 +86,7 @@ function AdminLoginPage() {
             value={username}
             onChange={(event) => setUsername(event.target.value)}
             placeholder="Enter the admin username"
-            maxLength={128}
+            maxLength={1024}
             required
             disabled={busy}
           />
@@ -101,7 +101,7 @@ function AdminLoginPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Enter the studio password"
-              maxLength={128}
+              maxLength={1024}
               required
               disabled={busy}
             />
@@ -112,13 +112,11 @@ function AdminLoginPage() {
             id="admin-otp"
             className="admin-login-otp"
             type="text"
-            inputMode="numeric"
             autoComplete="one-time-code"
-            pattern="[0-9]{6}"
-            maxLength={6}
+            maxLength={1024}
             value={otp}
-            onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))}
-            placeholder="6-digit code"
+            onChange={(event) => setOtp(event.target.value)}
+            placeholder="Enter your one-time code"
             required
             disabled={busy}
           />
@@ -134,7 +132,7 @@ function AdminLoginPage() {
           <Button
             type="submit"
             className="admin-login-submit"
-            disabled={busy || !username || !password || otp.length !== 6}
+            disabled={busy || !username || !password || !otp}
           >
             {busy ? <Loader2 className="spin" /> : <LockKeyhole />}
             {busy ? "Signing in…" : "Sign in to Qraf"}

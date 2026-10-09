@@ -4,8 +4,6 @@ import { getRequest, setCookie } from "@tanstack/react-start/server";
 export const ADMIN_SESSION_COOKIE = "airavoto_qraf_session";
 const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 const SESSION_MAX_AGE_MS = SESSION_MAX_AGE_SECONDS * 1000;
-const MIN_ADMIN_PASSWORD_LENGTH = 12;
-
 export function getSiteAdminPassword(): string | undefined {
   return process.env["SITE_ADMIN_PASSWORD"];
 }
@@ -22,15 +20,7 @@ function getAdminSessionKey(): Buffer | undefined {
   const username = getSiteAdminUsername();
   const password = getSiteAdminPassword();
   const otp = getSiteAdminOtp();
-  if (
-    !username ||
-    !password ||
-    password.length < MIN_ADMIN_PASSWORD_LENGTH ||
-    !otp ||
-    !/^\d{6}$/.test(otp)
-  ) {
-    return undefined;
-  }
+  if (!username || !password || !otp) return undefined;
   return createHash("sha256").update(`${username}\0${password}\0${otp}`).digest();
 }
 
