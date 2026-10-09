@@ -9,7 +9,16 @@ export const DEFAULT_GRADIENT_COLORS = [
 ] as const;
 
 export const AIRAVOTO_POSTER_SRC = "/templates/airavoto-gaming-poster.png";
-export const AIRAVOTO_POSTER_QR_SLOT = { x: 350, y: 741, size: 324 } as const;
+export const AIRAVOTO_POSTER_DIMENSIONS = { width: 1024, height: 1536 } as const;
+export const POSTER_QR_SIZE_BOUNDS = { min: 160, max: 420 } as const;
+
+export type QRPlacement = { x: number; y: number; size: number };
+export const DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT: QRPlacement = {
+  x: 350,
+  y: 741,
+  size: 324,
+};
+export const AIRAVOTO_POSTER_QR_SLOT = DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT;
 
 export type QRStyle = {
   mode: "solid" | "gradient";
@@ -18,6 +27,34 @@ export type QRStyle = {
   background: "white" | "transparent";
   size: number;
 };
+
+export function normalizePosterQRPlacement(
+  placement: QRPlacement,
+  width: number = AIRAVOTO_POSTER_DIMENSIONS.width,
+  height: number = AIRAVOTO_POSTER_DIMENSIONS.height,
+): QRPlacement {
+  const clamp = (value: number, minimum: number, maximum: number) =>
+    Math.min(maximum, Math.max(minimum, value));
+  const proposedSize = Number.isFinite(placement.size)
+    ? Math.round(placement.size)
+    : DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT.size;
+  const size = clamp(
+    proposedSize,
+    Math.min(POSTER_QR_SIZE_BOUNDS.min, width, height),
+    Math.min(POSTER_QR_SIZE_BOUNDS.max, width, height),
+  );
+  const proposedX = Number.isFinite(placement.x)
+    ? Math.round(placement.x)
+    : DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT.x;
+  const proposedY = Number.isFinite(placement.y)
+    ? Math.round(placement.y)
+    : DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT.y;
+  return {
+    x: clamp(proposedX, 0, width - size),
+    y: clamp(proposedY, 0, height - size),
+    size,
+  };
+}
 
 let posterImagePromise: Promise<HTMLImageElement> | undefined;
 
@@ -41,6 +78,7 @@ export async function renderQR(
   value: string,
   style: QRStyle,
   poster?: HTMLImageElement,
+  posterPlacement: QRPlacement = DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT,
 ) {
   const qr = QRCode.create(value, { errorCorrectionLevel: "H" });
   const count = qr.modules.size;
@@ -59,7 +97,9 @@ export async function renderQR(
     ctx.fillRect(0, 0, width, height);
   }
 
-  const slot = poster ? AIRAVOTO_POSTER_QR_SLOT : { x: 0, y: 0, size: style.size };
+  const slot = poster
+    ? normalizePosterQRPlacement(posterPlacement, width, height)
+    : { x: 0, y: 0, size: style.size };
   const unit = slot.size / (count + 8);
   const colors = style.colors.length ? style.colors : [DEFAULT_GRADIENT_COLORS[0]];
   const gradient = ctx.createLinearGradient(slot.x, slot.y, slot.x + slot.size, slot.y + slot.size);

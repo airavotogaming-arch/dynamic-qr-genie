@@ -344,3 +344,61 @@ button { cursor: pointer; }
   font-size: 9px;
   line-height: 1.5;
 }
+.poster-placement-controls {
+  margin: -6px 0 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--workspace-surface);
+}
+.poster-placement-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.poster-placement-heading strong {
+  font-size: 10px;
+  font-weight: 600;
+}
+.poster-placement-heading p,
+.poster-placement-footnote {
+  margin: 3px 0 0;
+  color: var(--muted-foreground);
+  font-size: 9px;
+  line-height: 1.45;
+}
+.poster-placement-heading button {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 9px;
+}
+.poster-placement-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 5px 12px;
+  margin-top: 9px;
+}
+.poster-placement-row label {
+  font-size: 9px;
+  font-weight: 500;
+}
+.poster-placement-row output {
+  color: var(--muted-foreground);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+.poster-placement-row input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--foreground);
+  cursor: pointer;
+}
+.poster-placement-footnote {
+  margin-top: 9px;
+}

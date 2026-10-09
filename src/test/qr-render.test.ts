@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { renderQR, type QRStyle } from "@/lib/qr-render";
+import { normalizePosterQRPlacement, renderQR, type QRStyle } from "@/lib/qr-render";
 
 function makeCanvas() {
   const addColorStop = vi.fn();
@@ -72,6 +72,33 @@ describe("QR rendering", () => {
     expect(context.drawImage).toHaveBeenCalledWith(poster, 0, 0, 1024, 1536);
     expect(context.fillRect).not.toHaveBeenCalled();
     expect(context.rect).toHaveBeenCalled();
+  });
+
+  it("moves the QR modules when poster X and Y coordinates change", async () => {
+    const poster = { naturalWidth: 1024, naturalHeight: 1536 } as HTMLImageElement;
+    const first = makeCanvas();
+    const moved = makeCanvas();
+    await renderQR(first.canvas, "https://example.com", baseStyle, poster, {
+      x: 300,
+      y: 700,
+      size: 280,
+    });
+    await renderQR(moved.canvas, "https://example.com", baseStyle, poster, {
+      x: 330,
+      y: 720,
+      size: 280,
+    });
+
+    expect(moved.context.rect.mock.calls[0]![0] - first.context.rect.mock.calls[0]![0]).toBe(30);
+    expect(moved.context.rect.mock.calls[0]![1] - first.context.rect.mock.calls[0]![1]).toBe(20);
+  });
+
+  it("clamps poster size and coordinates to the image bounds", () => {
+    expect(normalizePosterQRPlacement({ x: -20, y: 3000, size: 999 })).toEqual({
+      x: 0,
+      y: 1116,
+      size: 420,
+    });
   });
 
   it("rounds QR modules when the rounded pattern is selected", async () => {
