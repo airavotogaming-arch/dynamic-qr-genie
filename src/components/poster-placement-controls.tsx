@@ -70,7 +70,8 @@ export function PosterPlacementControls({ placement, onChange }: Props) {
         </div>
       ))}
       <p className="poster-placement-footnote">
-        Coordinates and size are in pixels on the 1024 × 1536 poster.
+        Coordinates use the 1024 × 1536 poster; keep the QR at least 240 px for reliable scanning.
+        Downloads are 2×.
       </p>
     </section>
   );
