@@ -1,6 +1,7 @@
 import QRCode from "qrcode";
 import { describe, expect, it, vi } from "vitest";
 import {
+  DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT,
   ensureQRCodeColorContrastOnWhite,
   getWhiteBackgroundContrastRatio,
   normalizePosterQRPlacement,
@@ -38,6 +39,10 @@ const baseStyle: QRStyle = {
 };
 
 describe("QR rendering", () => {
+  it("uses the requested poster QR placement by default", () => {
+    expect(DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT).toEqual({ x: 348, y: 698, size: 375 });
+  });
+
   it.each([512, 640, 1024])(
     "uses scan-contrasted gradient colors in %i px output",
     async (size) => {

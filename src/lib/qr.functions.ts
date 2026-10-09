@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import postgres from "postgres";
 import { z } from "zod";
 import { getDatabase } from "./db.server";
+import { isAdminSession } from "./site-auth.server";
 import {
   analyticsResultSchema,
   analyticsSchema,
@@ -58,9 +60,14 @@ function safeDatabaseError(error: unknown, fallback: string) {
   return new Error(fallback);
 }
 
+function requireStudioAdmin() {
+  if (!isAdminSession(getRequest())) throw new Error("Please sign in to the Airavoto Qraf studio.");
+}
+
 export const createQR = createServerFn({ method: "POST" })
   .validator(createSchema)
   .handler(async ({ data }) => {
+    requireStudioAdmin();
     try {
       const db = getDatabase();
       const [row] = await db`
@@ -77,6 +84,7 @@ export const createQR = createServerFn({ method: "POST" })
 export const manageQR = createServerFn({ method: "POST" })
   .validator(manageSchema)
   .handler(async ({ data }) => {
+    requireStudioAdmin();
     try {
       const db = getDatabase();
       const outcome = await db.begin(async (tx) => {
@@ -140,6 +148,7 @@ export const recordScan = createServerFn({ method: "POST" })
 export const getQRAnalytics = createServerFn({ method: "POST" })
   .validator(analyticsSchema)
   .handler(async ({ data }) => {
+    requireStudioAdmin();
     try {
       const db = getDatabase();
       const outcome = await db.begin(async (tx) => {

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { QRPreview } from '@/components/qr-preview';
 import { QRColorTools } from '@/components/qr-color-tools';
 import { PosterPlacementControls } from '@/components/poster-placement-controls';
+import { SignOutButton } from '@/components/sign-out-button';
 import { createQR, manageQR } from '@/lib/qr.functions';
 import { createSchema, manageSchema, type QRRecord } from '@/lib/qr-schema';
 import { AIRAVOTO_POSTER_DIMENSIONS, AIRAVOTO_POSTER_SRC, DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT, DEFAULT_GRADIENT_COLORS, loadAiravotoPoster, normalizePosterQRPlacement, POSTER_EXPORT_SCALE, POSTER_QR_LEGACY_MIN_SIZE, POSTER_QR_SIZE_BOUNDS, renderQR, type QRPlacement, type QRStyle } from '@/lib/qr-render';
@@ -148,7 +149,7 @@ function QRStudio() {
       <div className="sidebar-bottom"><div className="limit-label"><InfinityIcon /><span>Unlimited by design</span></div><p>Your next idea deserves a code.</p><div className="sidebar-rule" /><Button variant="ghost" className="side-item" onClick={() => setDialog('help')}><CircleHelp />Help & answers<ArrowUpRight className="nav-arrow" /></Button><div className="profile"><div className="profile-icon">Q</div><div><strong>Personal workspace</strong><span>Made for your next idea</span></div></div></div>
     </aside>
     <div className="main-shell">
-      <header className="topbar"><div className="breadcrumb">Workspace <span>/</span> <strong>QR generator</strong></div><div className="topbar-right"><span className="private-label"><ShieldCheck />Private by default</span><Button variant="outline" size="sm" onClick={() => openManage()}><LockKeyhole />Manage code</Button></div></header>
+      <header className="topbar"><div className="breadcrumb">Workspace <span>/</span> <strong>QR generator</strong></div><div className="topbar-right"><span className="private-label"><ShieldCheck />Private by default</span><Button variant="outline" size="sm" onClick={() => openManage()}><LockKeyhole />Manage code</Button><SignOutButton /></div></header>
       <main className="main-content">
         <div className="page-heading"><div><div className="eyebrow"><span />THE QR CODE STUDIO</div><h1>Small code. Endless possibilities.</h1><p>A beautiful connection to wherever you want to go.</p></div><span className="dynamic-badge"><span />DYNAMIC QR</span></div>
         <div className="studio-grid">

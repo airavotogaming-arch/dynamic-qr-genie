@@ -23,6 +23,14 @@ describe("App routing", () => {
     expect(matches.at(-1)?.routeId).toBe("/dashboard");
   });
 
+  it("matches the dedicated admin login route", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const matches = router.matchRoutes("/login");
+
+    expect(matches.at(-1)?.routeId).toBe("/login");
+  });
+
   it("matches a dynamic QR scan link", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
 

@@ -3,6 +3,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, BarChart3, CalendarDays, Clock, Grid2X2, Loader2, LockKeyhole, QrCode, RefreshCw, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { SignOutButton } from '@/components/sign-out-button';
 import { getQRAnalytics } from '@/lib/qr.functions';
 import { analyticsSchema, type QRAnalytics } from '@/lib/qr-schema';
 
@@ -68,7 +69,7 @@ function ScanDashboard() {
       <div className="sidebar-bottom"><div className="limit-label"><ShieldCheck /><span>Private by default</span></div></div>
     </aside>
     <div className="main-shell">
-      <header className="topbar"><div className="breadcrumb">Workspace<span>/</span><strong>Scan dashboard</strong></div><Button asChild variant="outline" size="sm"><Link to="/"><ArrowLeft />Generator</Link></Button></header>
+      <header className="topbar"><div className="breadcrumb">Workspace<span>/</span><strong>Scan dashboard</strong></div><div className="topbar-right"><Button asChild variant="outline" size="sm"><Link to="/"><ArrowLeft />Generator</Link></Button><SignOutButton /></div></header>
       <main className="main-content analytics-content">
         <div className="page-heading"><div><div className="eyebrow"><span />AIRAVOTO QRAF ANALYTICS</div><h1>Scan dashboard</h1></div><span className="private-label"><ShieldCheck />Password protected</span></div>
         <section className="analytics-selector" aria-label="Choose a QR code">

@@ -18,9 +18,9 @@ export const QR_MIN_WHITE_CONTRAST_RATIO = 4.5;
 
 export type QRPlacement = { x: number; y: number; size: number };
 export const DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT: QRPlacement = {
-  x: 350,
-  y: 741,
-  size: 324,
+  x: 348,
+  y: 698,
+  size: 375,
 };
 export const AIRAVOTO_POSTER_QR_SLOT = DEFAULT_AIRAVOTO_POSTER_QR_PLACEMENT;
 
