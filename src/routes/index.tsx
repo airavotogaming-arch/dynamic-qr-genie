@@ -1,19 +1,30 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowDownToLine, ArrowRight, ArrowUpRight, Check, ChevronDown, Copy, Eye, EyeOff, Grid2X2, Infinity as InfinityIcon, Link2, LockKeyhole, Palette, Plus, QrCode, Settings2, ShieldCheck, Sparkles, X, Loader2, Pencil, CircleHelp, BarChart3 } from 'lucide-react';
+import { ArrowDownToLine, ArrowRight, ArrowUpRight, Check, ChevronDown, Copy, Eye, EyeOff, Grid2X2, ImagePlus, Infinity as InfinityIcon, Link2, LockKeyhole, Palette, Plus, QrCode, Settings2, ShieldCheck, Sparkles, X, Loader2, Pencil, CircleHelp, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QRPreview } from '@/components/qr-preview';
 import { QRColorTools } from '@/components/qr-color-tools';
 import { createQR, manageQR } from '@/lib/qr.functions';
 import { createSchema, manageSchema, type QRRecord } from '@/lib/qr-schema';
-import { renderQR, type QRStyle } from '@/lib/qr-render';
+import { AIRAVOTO_POSTER_SRC, DEFAULT_GRADIENT_COLORS, loadAiravotoPoster, renderQR, type QRStyle } from '@/lib/qr-render';
 export const Route = createFileRoute('/')({
   head: () => ({ meta: [{ title: 'Airavoto Qraf — Dynamic QR Code Studio' }, { name: 'description', content: 'Create custom gradient QR codes, download high-resolution PNGs, and securely update destinations with your private password.' }, { property: 'og:title', content: 'Airavoto Qraf — Dynamic QR Code Studio' }, { property: 'og:description', content: 'Beautiful QR codes. Changeable links. Password-protected control.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
   component: QRStudio,
 });
-const colors = ['#161616', '#174b3a', '#164c9c', '#77354f', '#953e25', '#515056'] as const;
-const initialStyle: QRStyle = { mode: 'solid', start: colors[0], end: colors[2], pattern: 'square', background: 'white', size: 1024 };
+const initialStyle: QRStyle = { mode: 'gradient', colors: [...DEFAULT_GRADIENT_COLORS], pattern: 'rounded', background: 'white', size: 1024 };
+type SavedQRRecord = QRRecord & { style?: QRStyle; poster?: boolean };
+function isQRStyle(value: unknown): value is QRStyle {
+  if (!value || typeof value !== 'object') return false;
+  const style = value as Partial<QRStyle>;
+  return (style.mode === 'solid' || style.mode === 'gradient') && Array.isArray(style.colors) && style.colors.length >= 2 && style.colors.length <= 5 && style.colors.every(color => typeof color === 'string' && /^#[0-9a-f]{6}$/i.test(color)) && ['square', 'rounded', 'dots'].includes(style.pattern || '') && ['white', 'transparent'].includes(style.background || '') && [512, 1024, 2048, 4096].includes(style.size || 0);
+}
+function isSavedQRRecord(value: unknown): value is SavedQRRecord {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Partial<SavedQRRecord>;
+  return typeof item.id === 'string' && typeof item.label === 'string' && typeof item.destination === 'string' && (item.style === undefined || isQRStyle(item.style)) && (item.poster === undefined || typeof item.poster === 'boolean');
+}
+function cloneStyle(style: QRStyle): QRStyle { return { ...style, colors: [...style.colors] }; }
 function QRStudio() {
   const create = useServerFn(createQR), manage = useServerFn(manageQR);
   const [destination, setDestination] = useState('');
@@ -22,7 +33,8 @@ function QRStudio() {
   const [showPassword, setShowPassword] = useState(false);
   const [style, setStyle] = useState<QRStyle>(initialStyle);
   const [record, setRecord] = useState<QRRecord | null>(null);
-  const [recent, setRecent] = useState<QRRecord[]>([]);
+  const [recent, setRecent] = useState<SavedQRRecord[]>([]);
+  const [usePoster, setUsePoster] = useState(false);
   const [origin, setOrigin] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -36,22 +48,29 @@ function QRStudio() {
   useEffect(() => {
     // A fixed public origin keeps printed QR codes stable when previewing on another device.
     setOrigin(window.location.hostname === 'localhost' ? window.location.origin : 'https://dynamic-qr-genie.onrender.com');
-    try { const saved = JSON.parse(localStorage.getItem('qraft-recent') || '[]'); if (Array.isArray(saved)) setRecent(saved.filter(r => r && typeof r.id === 'string' && typeof r.label === 'string' && typeof r.destination === 'string')); } catch { /* empty history */ }
+    try { const saved = JSON.parse(localStorage.getItem('qraft-recent') || '[]'); if (Array.isArray(saved)) setRecent(saved.filter(isSavedQRRecord)); } catch { /* empty history */ }
   }, []);
   useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(''), 4000); return () => clearTimeout(timer); }, [notice]);
   useEffect(() => { if (!dialog) return; const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setDialog(null); }; window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, [dialog]);
   const qrValue = record ? `${origin}/q/${record.id}` : (destination || 'https://example.com');
   const previewStyle = useMemo(() => ({ ...style, size: 640 }), [style]);
-  function remember(item: QRRecord) {
-    const next = [item, ...recent.filter(r => r.id !== item.id)];
-    setRecent(next); localStorage.setItem('qraft-recent', JSON.stringify(next));
+  function remember(item: QRRecord, design?: { style: QRStyle; poster: boolean }) {
+    const existing = recent.find(r => r.id === item.id);
+    const saved: SavedQRRecord = {
+      ...item,
+      ...(design?.style ? { style: cloneStyle(design.style) } : existing?.style ? { style: cloneStyle(existing.style) } : {}),
+      poster: design?.poster ?? existing?.poster ?? false,
+    };
+    const next = [saved, ...recent.filter(r => r.id !== item.id)];
+    setRecent(next);
+    localStorage.setItem('qraft-recent', JSON.stringify(next));
   }
   async function generate(event: React.FormEvent) {
     event.preventDefault(); setError('');
     const parsed = createSchema.safeParse({ destination, label, password });
     if (!parsed.success) { setError(parsed.error.issues[0]?.message || 'Please check your details.'); return; }
     setBusy(true);
-    try { const result = await create({ data: parsed.data }); setRecord(result); remember(result); setPassword(''); setNotice('Your dynamic QR code is ready.'); }
+    try { const result = await create({ data: parsed.data }); setRecord(result); remember(result, { style: cloneStyle(style), poster: usePoster }); setPassword(''); setNotice('Your dynamic QR code is ready.'); }
     catch (e) { setError(e instanceof Error ? e.message : 'Your code could not be created.'); }
     finally { setBusy(false); }
   }
@@ -70,10 +89,38 @@ function QRStudio() {
     } catch (e) { setDialogError(e instanceof Error ? e.message : 'Unable to open this code.'); }
     finally { setBusy(false); }
   }
+  async function exportPNG(value: string, filename: string, selectedStyle: QRStyle, poster: boolean) {
+    const canvas = document.createElement('canvas');
+    const image = poster ? await loadAiravotoPoster() : undefined;
+    const outputStyle = { ...selectedStyle, background: poster ? 'transparent' as const : selectedStyle.background };
+    await renderQR(canvas, value, outputStyle, image);
+    const anchor = document.createElement('a');
+    anchor.download = `${filename}${poster ? '-poster' : ''}.png`;
+    anchor.href = canvas.toDataURL('image/png');
+    anchor.click();
+  }
   async function download() {
     if (!record) return;
-    const canvas = document.createElement('canvas'); await renderQR(canvas, qrValue, style);
-    const a = document.createElement('a'); a.download = `${(record.label || 'airavoto-qraf').replace(/[^a-z0-9-_]/gi, '-')}.png`; a.href = canvas.toDataURL('image/png'); a.click(); setNotice('PNG downloaded.');
+    try {
+      const outputStyle = { ...style, background: usePoster ? 'transparent' as const : style.background };
+      remember(record, { style: outputStyle, poster: usePoster });
+      await exportPNG(qrValue, (record.label || 'airavoto-qraf').replace(/[^a-z0-9-_]/gi, '-'), outputStyle, usePoster);
+      setNotice(usePoster ? 'Poster PNG downloaded.' : 'QR PNG downloaded.');
+    } catch {
+      setNotice('The PNG could not be downloaded. Please try again.');
+    }
+  }
+  async function downloadAgain(item: SavedQRRecord) {
+    try {
+      const savedStyle = cloneStyle(item.style ?? initialStyle);
+      const poster = item.poster === true;
+      const outputStyle = { ...savedStyle, background: poster ? 'transparent' as const : savedStyle.background };
+      const publicOrigin = origin || window.location.origin;
+      await exportPNG(`${publicOrigin}/q/${item.id}`, (item.label || 'airavoto-qraf').replace(/[^a-z0-9-_]/gi, '-'), outputStyle, poster);
+      setNotice(poster ? 'Poster PNG downloaded again.' : 'QR PNG downloaded again.');
+    } catch {
+      setNotice('The saved QR image could not be downloaded. Please try again.');
+    }
   }
   async function copy(value: string) { try { await navigator.clipboard.writeText(value); setNotice('Copied to clipboard.'); } catch { setNotice('Copy unavailable. Select and copy the link instead.'); } }
   return <div className="workspace">
@@ -97,14 +144,14 @@ function QRStudio() {
             <div className="editor-tabs"><span className="selected"><Link2 />Website URL</span><span className="tab-note"><InfinityIcon />No limits. Just links.</span></div>
             <form onSubmit={generate}>
               <div className="form-section"><div className="section-heading"><span className="step">01</span><h2>Make the connection</h2><Link2 className="section-symbol" /></div><label htmlFor="destination">Destination URL <span className="required">*</span></label><div className="icon-input"><Link2 /><input id="destination" type="url" placeholder="https://your-website.com" maxLength={2048} value={destination} onChange={e => setDestination(e.target.value)} disabled={!!record} required /></div><div className="field-note">{record ? 'Edit the destination from Manage code.' : 'The destination can change. Your QR code won’t.'}</div><label htmlFor="code-name" className="label-spaced">Code name <span className="optional">Optional</span></label><input id="code-name" placeholder="Give your code a name" maxLength={80} value={label} onChange={e => setLabel(e.target.value)} disabled={!!record} /></div>
-              <div className="form-section"><div className="section-heading"><span className="step">02</span><h2>A little more you</h2><Palette className="section-symbol" /></div><QRColorTools style={style} setStyle={setStyle} /><div className="pattern-heading"><label>Pattern</label><span className="field-note">The details make it yours.</span></div><div className="pattern-options">{(['square', 'rounded', 'dots'] as const).map(pattern => <Button key={pattern} type="button" variant="outline" className={`pattern-option ${style.pattern === pattern ? 'selected' : ''}`} onClick={() => setStyle({ ...style, pattern })}><span className={`pattern-icon ${pattern}`}>{Array.from({ length: 9 }, (_, i) => <i key={i} />)}</span><span>{pattern.charAt(0).toUpperCase() + pattern.slice(1)}</span>{style.pattern === pattern && <Check className="pattern-check" />}</Button>)}</div><div className="pattern-heading"><label>Background</label><span className="field-note">Transparent PNG for overlays.</span></div><div className="pattern-options background-options">{(['white', 'transparent'] as const).map(background => <Button key={background} type="button" variant="outline" aria-pressed={style.background === background} className={`pattern-option ${style.background === background ? 'selected' : ''}`} onClick={() => setStyle(previous => ({ ...previous, background }))}><span>{background === 'white' ? 'White' : 'Transparent'}</span>{style.background === background && <Check className="pattern-check" />}</Button>)}</div></div>
+              <div className="form-section"><div className="section-heading"><span className="step">02</span><h2>A little more you</h2><Palette className="section-symbol" /></div><QRColorTools style={style} setStyle={setStyle} />{style.mode === 'gradient' && style.colors.some(color => color.toUpperCase() === '#FFFFFF') && !usePoster && <p className="field-note qr-contrast-note">The white gradient stop blends into white paper; the dark poster gives it the strongest contrast.</p>}<div className="pattern-heading"><label>Pattern</label><span className="field-note">The details make it yours.</span></div><div className="pattern-options">{(['square', 'rounded', 'dots'] as const).map(pattern => <Button key={pattern} type="button" variant="outline" className={`pattern-option ${style.pattern === pattern ? 'selected' : ''}`} onClick={() => setStyle({ ...style, pattern })}><span className={`pattern-icon ${pattern}`}>{Array.from({ length: 9 }, (_, i) => <i key={i} />)}</span><span>{pattern.charAt(0).toUpperCase() + pattern.slice(1)}</span>{style.pattern === pattern && <Check className="pattern-check" />}</Button>)}</div><div className="poster-template"><img src={AIRAVOTO_POSTER_SRC} alt="Airavoto Gaming poster with an empty QR panel" loading="lazy" /><div className="poster-template-copy"><strong>Airavoto Gaming poster</strong><span>Place a transparent QR in the empty center panel.</span><Button type="button" variant={usePoster ? 'default' : 'outline'} aria-pressed={usePoster} onClick={() => { const selected = !usePoster; setUsePoster(selected); setStyle(previous => ({ ...previous, background: selected ? 'transparent' : 'white' })); }}><ImagePlus />{usePoster ? 'Remove poster' : 'Use this poster'}</Button></div></div><div className="pattern-heading"><label>QR background</label><span className="field-note">{usePoster ? 'Transparent for the selected poster.' : 'Choose the poster to enable transparency.'}</span></div><div className="pattern-options background-options">{(['white', 'transparent'] as const).map(background => <Button key={background} type="button" variant="outline" aria-pressed={style.background === background} disabled={background === 'white' ? usePoster : !usePoster} className={`pattern-option ${style.background === background ? 'selected' : ''}`} onClick={() => setStyle(previous => ({ ...previous, background }))}><span>{background === 'white' ? 'White' : 'Transparent'}</span>{style.background === background && <Check className="pattern-check" />}</Button>)}</div></div>
               <div className="form-section security-section"><div className="section-heading"><span className="step">03</span><h2>Keep it in your hands</h2><LockKeyhole className="section-symbol" /></div>{record ? <div className="protected-success"><ShieldCheck /><div><strong>Password protected</strong><span>Keep your password and code ID safe.</span></div><Button type="button" variant="ghost" size="sm" onClick={() => openManage(record.id)}>Edit link<ArrowRight /></Button></div> : <><label htmlFor="edit-password">Edit password <span className="required">*</span><span className="label-tail"><LockKeyhole />Only you</span></label><div className="password-input"><input id="edit-password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Create a private password" minLength={10} maxLength={64} value={password} onChange={e => setPassword(e.target.value)} required /><Button type="button" variant="ghost" size="icon" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff /> : <Eye />}</Button></div><div className="field-note">At least 10 characters. Keep it safe — it can’t be recovered.</div></>}{error && <p className="error-message" role="alert">{error}</p>}<Button className="generate-button" type={record ? 'button' : 'submit'} disabled={busy} onClick={record ? reset : undefined}>{busy ? <Loader2 className="spin" /> : record ? <Plus /> : <QrCode />}{busy ? 'Creating your code…' : record ? 'Create another QR code' : 'Generate QR code'}<ArrowRight className="button-arrow" /></Button><div className="generate-note"><ShieldCheck />Password protected<span>·</span><InfinityIcon />Unlimited codes</div></div>
             </form>
           </section>
-          <section className="preview-panel" aria-label="QR preview and export"><div className="preview-heading"><h2>Looking good.</h2><span><span />LIVE PREVIEW</span></div><div className="preview-stage"><div className="preview-cross top-left" /><div className="preview-cross top-right" /><div className="preview-cross bottom-left" /><div className="preview-cross bottom-right" /><div className={`qr-paper ${style.background === 'transparent' ? 'transparent' : ''}`}><QRPreview value={qrValue} style={previewStyle} /></div></div><div className="preview-caption"><span className="mini-qr"><QrCode /></span><div><strong>{record ? (record.label || 'Your dynamic QR code') : 'Your next connection'}</strong><span>{record ? 'Ready for the real world' : 'Made to stand out. Built to scan.'}</span></div></div><div className="export-settings"><div><label htmlFor="export-size">Export size</label><div className="select-wrap"><select id="export-size" value={style.size} onChange={e => setStyle({ ...style, size: Number(e.target.value) })}><option value={512}>512 × 512 px</option><option value={1024}>1024 × 1024 px</option><option value={2048}>2048 × 2048 px</option><option value={4096}>4096 × 4096 px</option></select><ChevronDown /></div></div><div><label>File format</label><div className="format-value">PNG<span>High quality</span></div></div></div><Button variant="outline" className="download-button" onClick={download} disabled={!record}><ArrowDownToLine />Download PNG<ArrowDownToLine className="download-tail" /></Button><div className="export-note">{record ? 'Ready to print, share, or put anywhere.' : 'Generate your code to unlock the download.'}</div>{record && <div className="saved-code"><span>YOUR PERMANENT QR LINK</span><div><input readOnly value={qrValue} aria-label="Permanent QR link" /><Button variant="ghost" size="icon" title="Copy permanent link" aria-label="Copy permanent link" onClick={() => copy(qrValue)}><Copy /></Button></div><Button variant="link" onClick={() => copy(record.id)}><Copy />Copy code ID for future editing</Button></div>}<div className="preview-footer"><LockKeyhole /><p>Your link is flexible.<br /><strong>Your code is forever yours.</strong></p><ArrowUpRight /></div></section>
+          <section className="preview-panel" aria-label="QR preview and export"><div className="preview-heading"><h2>Looking good.</h2><span><span />LIVE PREVIEW</span></div><div className={`preview-stage ${usePoster ? 'poster-preview-stage' : ''}`}><div className="preview-cross top-left" /><div className="preview-cross top-right" /><div className="preview-cross bottom-left" /><div className="preview-cross bottom-right" /><div className={`qr-paper ${usePoster ? 'poster' : style.background === 'transparent' ? 'transparent' : ''}`}><QRPreview value={qrValue} style={previewStyle} poster={usePoster} /></div></div><div className="preview-caption"><span className="mini-qr"><QrCode /></span><div><strong>{record ? (record.label || 'Your dynamic QR code') : 'Your next connection'}</strong><span>{record ? 'Ready for the real world' : 'Made to stand out. Built to scan.'}</span></div></div><div className="export-settings"><div><label>{usePoster ? 'Poster size' : 'Export size'}</label>{usePoster ? <div className="format-value">1024 × 1536 px<span>Original poster resolution</span></div> : <div className="select-wrap"><select id="export-size" value={style.size} onChange={e => setStyle({ ...style, size: Number(e.target.value) })}><option value={512}>512 × 512 px</option><option value={1024}>1024 × 1024 px</option><option value={2048}>2048 × 2048 px</option><option value={4096}>4096 × 4096 px</option></select><ChevronDown /></div>}</div><div><label>File format</label><div className="format-value">PNG<span>High quality</span></div></div></div><Button variant="outline" className="download-button" onClick={download} disabled={!record}><ArrowDownToLine />{usePoster ? 'Download poster PNG' : 'Download QR PNG'}<ArrowDownToLine className="download-tail" /></Button><div className="export-note">{record ? 'Ready to print, share, or put anywhere.' : 'Generate your code to unlock the download.'}</div>{record && <div className="saved-code"><span>YOUR PERMANENT QR LINK</span><div><input readOnly value={qrValue} aria-label="Permanent QR link" /><Button variant="ghost" size="icon" title="Copy permanent link" aria-label="Copy permanent link" onClick={() => copy(qrValue)}><Copy /></Button></div><Button variant="link" onClick={() => copy(record.id)}><Copy />Copy code ID for future editing</Button></div>}<div className="preview-footer"><LockKeyhole /><p>Your link is flexible.<br /><strong>Your code is forever yours.</strong></p><ArrowUpRight /></div></section>
         </div>
         <div className="promise-row"><div><Link2 /><span><strong>One code, any destination</strong><small>Change the link. Keep the code.</small></span></div><div><ShieldCheck /><span><strong>Your password. Your control.</strong><small>No one else gets to edit your link.</small></span></div><div><InfinityIcon /><span><strong>Create without limits</strong><small>As many ideas as you have.</small></span></div></div>
-        <section className="recent-section" id="recent-codes"><div className="recent-heading"><h2>My QR codes <span>{recent.length}</span></h2><span>On this device</span></div>{recent.length === 0 ? <div className="empty-history"><QrCode /><span>Your collection starts with your first code.</span><span>Go make a connection <ArrowUpRight /></span></div> : <div className="recent-list">{recent.map(item => <div className="recent-item" key={item.id}><span className="recent-icon"><QrCode /></span><div><strong>{item.label || 'Untitled QR code'}</strong><span>{item.destination}</span></div><span className="status-label"><span />Active</span><Button variant="ghost" size="icon" aria-label={`Copy ID for ${item.label || 'Untitled QR code'}`} title="Copy code ID" onClick={() => copy(item.id)}><Copy /></Button><Button variant="outline" size="sm" onClick={() => openManage(item.id)}><Pencil />Edit link</Button></div>)}</div>}</section>
+        <section className="recent-section" id="recent-codes"><div className="recent-heading"><h2>My QR codes <span>{recent.length}</span></h2><span>On this device</span></div>{recent.length === 0 ? <div className="empty-history"><QrCode /><span>Your collection starts with your first code.</span><span>Go make a connection <ArrowUpRight /></span></div> : <div className="recent-list">{recent.map(item => <div className="recent-item" key={item.id}><span className="recent-icon"><QrCode /></span><div><strong>{item.label || 'Untitled QR code'}</strong><span>{item.destination}</span></div><span className="status-label"><span />Active</span><Button variant="ghost" size="icon" aria-label={`Copy ID for ${item.label || 'Untitled QR code'}`} title="Copy code ID" onClick={() => copy(item.id)}><Copy /></Button><Button variant="outline" size="sm" onClick={() => void downloadAgain(item)}><ArrowDownToLine />Download again</Button><Button variant="outline" size="sm" onClick={() => openManage(item.id)}><Pencil />Edit link</Button></div>)}</div>}</section>
         <footer className="page-footer"><span>Less friction. More connection.</span><span>POWERED BY AIRAVOTO QRAF <QrCode /></span></footer>
       </main>
     </div>

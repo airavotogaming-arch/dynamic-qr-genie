@@ -259,3 +259,88 @@ button { cursor: pointer; }
   flex-direction: row;
   justify-content: center;
 }
+
+/* Optional Airavoto Gaming poster composition. */
+.poster-template {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--workspace-surface);
+}
+.poster-template img {
+  display: block;
+  width: 54px;
+  height: 81px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.poster-template-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+.poster-template-copy strong {
+  font-size: 10px;
+  font-weight: 600;
+}
+.poster-template-copy > span {
+  color: var(--muted-foreground);
+  font-size: 9px;
+  line-height: 1.5;
+}
+.poster-template-copy button {
+  margin-top: 2px;
+  font-size: 9px;
+}
+.poster-preview-stage {
+  height: 300px;
+  min-height: 0;
+  max-height: 300px;
+  aspect-ratio: auto;
+  padding: 12px;
+}
+.qr-paper.poster {
+  width: auto;
+  height: 100%;
+  max-width: none;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.qr-paper.poster:hover {
+  transform: none;
+}
+.qr-canvas.poster {
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: contain;
+}
+@media (max-width: 650px) {
+  .poster-preview-stage {
+    height: 300px;
+  }
+  .recent-item {
+    flex-wrap: wrap;
+  }
+  .recent-item > div {
+    min-width: calc(100% - 55px);
+  }
+}
+.qr-contrast-note {
+  margin: 9px 0 0;
+  color: var(--muted-foreground);
+  font-size: 9px;
+  line-height: 1.5;
+}
